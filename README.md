@@ -84,7 +84,7 @@ This will generate all the Terraform files defined in the stack.tm.hcl for each 
 ### Initialize the Project
 Navigate to the project root or the specific stack you would like to initialize, and execute:
 ```shell
-terramate init
+terramate run --tags networking -- terraform init
 ```
 
 ⚠️ **Warning**: For init/plan/apply via Terramate, ensure you don't have any unstaged changes in your version control system (like Git). Otherwise, you'll see a message like:
