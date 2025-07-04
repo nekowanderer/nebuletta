@@ -148,3 +148,53 @@ This is equivalent to performing the `terraform destroy` command under the netwo
 Like the apply operation, it will prompt for confirmation before destroying the specified resources. Type `yes` if you have carefully reviewed the details.
 
 After the destroy operation, check the message and log into your public cloud interface (like AWS Console) to double-check the resource allocation status.
+
+### Install Oh-My-Zsh on AWS EC2 Instance
+
+```bash
+sudo yum update
+
+sudo yum -y install zsh util-linux-user git curl wget
+
+sudo chsh -s $(which zsh) $(whoami)
+
+sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+git clone https://github.com/zsh-users/zsh-completions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-completions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
+```
+
+Update `~/.zshrc`:
+```bash
+
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Path to your Oh My Zsh installation.
+export ZSH="$HOME/.oh-my-zsh"
+
+# ZSH_THEME="robbyrussell"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+DEFAULT_USER="clu"
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(os_icon context dir dir_writable vcs prompt_char)
+POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
+
+plugins=(git zsh-completions zsh-autosuggestions zsh-syntax-highlighting)
+
+source $ZSH/oh-my-zsh.sh
+
+export USER=ssm-user
+
+alias refresh='source ~/.zshrc'
+alias kubectl='minikube kubectl -- '
+alias start_docker='sudo service docker start'
+alias start_minikube='minikube start --driver docker'
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+```
