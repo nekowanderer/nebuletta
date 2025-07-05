@@ -31,6 +31,9 @@ The project documentation is maintained in a separate repository, [click here to
 
 ```shell
 .
+├── scripts
+│   ├── ssm_user_setup.sh
+│   └── terraform_cleanup.sh
 └── terraform
     ├── modules
     │   ├── compute
@@ -54,7 +57,11 @@ The project documentation is maintained in a separate repository, [click here to
         └── random-id-generator
 ```
 
-In this project, Terramate stacks are defined under the `terraform/stacks` folder. For example, `dev`/`staging`/`production` folders represent dedicated stacks/environments that leverage the modules under the `terraform/modules` folder. 
+| Directory | Purpose | Description |
+|-----------|---------|-------------|
+| `scripts/` | Utility Scripts | Contains project maintenance and setup related script files |
+| `terraform/modules/` | Terraform Modules | Reusable infrastructure components that provide standardized resource configurations |
+| `terraform/stacks/` | Terramate Stacks | Environment-specific configurations such as `dev`/`staging`/`production` |
 
 You can compose the stack according to your requirements by adding different subfolders under the specific stack folder and writing the appropriate `stack.tm.hcl` file for each module.
 
@@ -72,7 +79,7 @@ Please adjust the path in the following command according to your current path:
 ```shell
 terramate create path/to/stack
 ```
-This will help to generate the `stack.tm.hcl` under the created stack folder.
+This will help to generate the `stack.tm.hcl` with dedicated UUID under the created stack folder.
 
 ### Generate .tf Files for Stacks
 Navigate to the project root and execute:
@@ -149,52 +156,14 @@ Like the apply operation, it will prompt for confirmation before destroying the 
 
 After the destroy operation, check the message and log into your public cloud interface (like AWS Console) to double-check the resource allocation status.
 
-### Install Oh-My-Zsh on AWS EC2 Instance
+### Setup Terminal and Related Tools for EC2 SSM User
+- Please copy the content of [ssm_user_setup.sh](./scripts/ssm_user_setup.sh) and save it to a `.sh` file under the home directory of the `ssm-user` once you launch the EC2 instance. The commands are listed below:
 
-```bash
-sudo yum update
+  ```bash
+  $ vi ssm_user_setup.sh
 
-sudo yum -y install zsh util-linux-user git curl wget
+  $ chmod +x ssm_user_setup.sh
+  
+  $ ./ssm_user_setup.sh
+  ```
 
-sudo chsh -s $(which zsh) $(whoami)
-
-sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
-
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-git clone https://github.com/zsh-users/zsh-completions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-completions
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-
-```
-
-Update `~/.zshrc`:
-```bash
-
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
-# Path to your Oh My Zsh installation.
-export ZSH="$HOME/.oh-my-zsh"
-
-# ZSH_THEME="robbyrussell"
-ZSH_THEME="powerlevel10k/powerlevel10k"
-
-DEFAULT_USER="clu"
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(os_icon context dir dir_writable vcs prompt_char)
-POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
-
-plugins=(git zsh-completions zsh-autosuggestions zsh-syntax-highlighting)
-
-source $ZSH/oh-my-zsh.sh
-
-export USER=ssm-user
-
-alias refresh='source ~/.zshrc'
-alias kubectl='minikube kubectl -- '
-alias start_docker='sudo service docker start'
-alias start_minikube='minikube start --driver docker'
-
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-```
