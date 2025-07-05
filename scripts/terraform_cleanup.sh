@@ -29,15 +29,15 @@ fi
 echo "Starting Terraform cleanup..."
 
 # Find and remove all .terraform directories
-find terraform -type d -name ".terraform" -exec rm -rf {} +
+find ../terraform -type d -name ".terraform" -exec rm -rf {} +
 
 # Find and remove all terraform.tfstate files
-find terraform -type f -name "terraform.tfstate" -delete
+find ../terraform -type f -name "terraform.tfstate" -delete
 
 # Find and remove all _terramate_generated*.tf files
-find terraform -type f -name "_terramate_generated*.tf" -delete
+find ../terraform -type f -name "_terramate_generated*.tf" -delete
 
 # Find and remove all .terraform.lock.hcl files
-find terraform -type f -name ".terraform.lock.hcl" -delete
+find ../terraform -type f -name ".terraform.lock.hcl" -delete
 
 echo "Cleanup completed!" 

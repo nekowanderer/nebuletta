@@ -1,0 +1,9 @@
+env               = "dev"
+aws_region        = "ap-northeast-1"
+project           = "nebuletta"
+module_name       = "eks-admin-ec2"
+managed_by        = "Terraform"
+instance_type     = "t3.medium"
+ami_id            = "" # Use default Amazon Linux 2 AMI 
+vpc_id            = ""
+public_subnet_ids = []

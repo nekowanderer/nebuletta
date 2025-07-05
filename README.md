@@ -31,6 +31,9 @@ The project documentation is maintained in a separate repository, [click here to
 
 ```shell
 .
+├── scripts
+│   ├── ssm_user_setup.sh
+│   └── terraform_cleanup.sh
 └── terraform
     ├── modules
     │   ├── compute
@@ -54,7 +57,11 @@ The project documentation is maintained in a separate repository, [click here to
         └── random-id-generator
 ```
 
-In this project, Terramate stacks are defined under the `terraform/stacks` folder. For example, `dev`/`staging`/`production` folders represent dedicated stacks/environments that leverage the modules under the `terraform/modules` folder. 
+| Directory | Purpose | Description |
+|-----------|---------|-------------|
+| `scripts/` | Utility Scripts | Contains project maintenance and setup related script files |
+| `terraform/modules/` | Terraform Modules | Reusable infrastructure components that provide standardized resource configurations |
+| `terraform/stacks/` | Terramate Stacks | Environment-specific configurations such as `dev`/`staging`/`production` |
 
 You can compose the stack according to your requirements by adding different subfolders under the specific stack folder and writing the appropriate `stack.tm.hcl` file for each module.
 
@@ -72,7 +79,7 @@ Please adjust the path in the following command according to your current path:
 ```shell
 terramate create path/to/stack
 ```
-This will help to generate the `stack.tm.hcl` under the created stack folder.
+This will help to generate the `stack.tm.hcl` with dedicated UUID under the created stack folder.
 
 ### Generate .tf Files for Stacks
 Navigate to the project root and execute:
@@ -84,7 +91,7 @@ This will generate all the Terraform files defined in the stack.tm.hcl for each 
 ### Initialize the Project
 Navigate to the project root or the specific stack you would like to initialize, and execute:
 ```shell
-terramate init
+terramate run --tags networking -- terraform init
 ```
 
 ⚠️ **Warning**: For init/plan/apply via Terramate, ensure you don't have any unstaged changes in your version control system (like Git). Otherwise, you'll see a message like:
@@ -148,3 +155,15 @@ This is equivalent to performing the `terraform destroy` command under the netwo
 Like the apply operation, it will prompt for confirmation before destroying the specified resources. Type `yes` if you have carefully reviewed the details.
 
 After the destroy operation, check the message and log into your public cloud interface (like AWS Console) to double-check the resource allocation status.
+
+### Setup Terminal and Related Tools for EC2 SSM User
+- Please copy the content of [ssm_user_setup.sh](./scripts/ssm_user_setup.sh) and save it to a `.sh` file under the home directory of the `ssm-user` once you launch the EC2 instance. The commands are listed below:
+
+  ```bash
+  $ vi ssm_user_setup.sh
+
+  $ chmod +x ssm_user_setup.sh
+  
+  $ ./ssm_user_setup.sh
+  ```
+

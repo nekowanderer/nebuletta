@@ -1,11 +1,11 @@
 stack {
-  name        = "bastion"
-  description = "bastion"
-  id          = "f0947757-dfc1-421a-a429-b7ccb4dd0092"
+  name        = "eks-admin"
+  description = "eks-admin ec2"
+  id          = "19600efc-14fa-4456-9e8a-8607ab04842d"
   tags = [
     "dev",
     "infrastructure",
-    "bastion"
+    "eks-admin"
   ]
 
   after = [
@@ -18,7 +18,7 @@ generate_hcl "_terramate_generated_backend.tf" {
     terraform {
       backend "s3" {
         bucket         = global.backend.s3.bucket
-        key            = "bastion/terraform.tfstate"
+        key            = "eks-admin/terraform.tfstate"
         region         = global.aws_region
         encrypt        = true
         dynamodb_table = global.backend.dynamodb.table
@@ -42,12 +42,12 @@ generate_hcl "_terramate_generated_terraform_remote_state.tf" {
 
 generate_hcl "_terramate_generated_main.tf" {
   content {
-    module "bastion" {
-      source = "../../../../../../modules/compute/ec2/public/bastion"
+    module "eks-admin" {
+      source = "../../../../../../modules/compute/ec2/public/eks-admin"
       env     = global.env
       aws_region = global.aws_region
       project = global.project.name
-      module_name = "bastion"
+      module_name = "eks-admin-ec2"
       managed_by = global.managed_by
       instance_type = "t3.medium"
       ami_id = ""
@@ -60,27 +60,27 @@ generate_hcl "_terramate_generated_main.tf" {
 generate_hcl "_terramate_generated_outputs.tf" {
   content {
     output "instance_id" {
-      value = module.bastion.instance_id
+      value = module.eks-admin.instance_id
     }
 
     output "instance_private_ip" {
-      value = module.bastion.instance_private_ip
+      value = module.eks-admin.instance_private_ip
     }
 
     output "instance_public_ip" {
-      value = module.bastion.instance_public_ip
+      value = module.eks-admin.instance_public_ip
     }
 
     output "security_group_id" {
-      value = module.bastion.security_group_id
+      value = module.eks-admin.security_group_id
     }
 
     output "iam_role_arn" {
-      value = module.bastion.iam_role_arn
+      value = module.eks-admin.iam_role_arn
     }
 
     output "iam_instance_profile_arn" {
-      value = module.bastion.iam_instance_profile_arn
+      value = module.eks-admin.iam_instance_profile_arn
     }
   }
 }

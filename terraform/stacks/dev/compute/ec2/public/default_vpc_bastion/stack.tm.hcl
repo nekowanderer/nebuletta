@@ -8,7 +8,7 @@ stack {
   ]
 
   after = [
-    "tags:default-vpc"
+    "/terraform/stacks/dev/default-vpc"
   ]
 }
 
