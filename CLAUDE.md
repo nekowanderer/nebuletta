@@ -2,11 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 專案概述
+## Project Overview
 
-Nebuletta 是一個實驗性的基礎設施即代碼（IaC）專案，使用 Terraform 和 Terramate 在 AWS 上快速配置自管理的雲端基礎設施。
+Nebuletta is an experimental Infrastructure-as-Code (IaC) project that uses Terraform and Terramate to rapidly provision self-managed cloud infrastructure on AWS.
 
-## 核心工具與版本
+## Core Tools and Versions
 
 - **Terraform**: >= 1.11.4
 - **Terramate**: >= 0.13.1  
@@ -14,86 +14,142 @@ Nebuletta 是一個實驗性的基礎設施即代碼（IaC）專案，使用 Ter
 - **AWS Provider**: ~> 5.97
 - **Random Provider**: ~> 3.1.0
 
-## 專案架構
+## Project Architecture
 
-### 目錄結構
+### Directory Structure
 ```
-terraform/
-├── modules/           # 可重複使用的 Terraform 模組
-│   ├── networking/    # VPC、子網、路由表等網路資源
-│   ├── compute/       # EC2 和 Fargate 運算資源
-│   ├── s3/           # S3 儲存資源
-│   └── state-storage/ # Terraform 狀態儲存
-└── stacks/           # 不同環境的 Terramate 堆疊
-    ├── dev/          # 開發環境
-    └── random-id-generator/ # 通用隨機 ID 生成器
+.
+│──scripts/
+│  ├── ssm_user_setup.sh      # SSM user setup script
+│  └── terraform_cleanup.sh   # Terraform cleanup script
+│   
+└──terraform/
+    ├── keycloak_cluster/       # Keycloak cluster configuration
+    │   └── foundation/
+    ├── modules/               # Reusable Terraform modules
+    │   ├── compute/          # Compute resources
+    │   │   ├── ec2/          # EC2 instances
+    │   │   │   ├── private/  # Private EC2
+    │   │   │   │   ├── dev/
+    │   │   │   │   └── isolated/
+    │   │   │   └── public/   # Public EC2
+    │   │   │       ├── bastion/
+    │   │   │       ├── default_vpc_bastion/
+    │   │   │       └── eks-admin/
+    │   │   └── fargate/      # Fargate services
+    │   │       ├── service/
+    │   │       └── task/
+    │   ├── default-vpc/      # Default VPC resources
+    │   ├── networking/       # VPC, subnets, route tables, and other network resources
+    │   ├── random-id-generator/ # Random ID generator
+    │   ├── s3/              # S3 storage resources
+    │   │   ├── archive-bucket/
+    │   │   └── general-bucket/
+    │   └── state-storage/    # Terraform state storage
+    └── stacks/              # Terramate stacks for different environments
+        ├── dev/             # Development environment
+        │   ├── compute/
+        │   │   └── ec2/
+        │   │       ├── private/
+        │   │       └── public/
+        │   ├── default-vpc/
+        │   ├── networking/
+        │   ├── s3/
+        │   └── state-storage/
+        └── random-id-generator/
 ```
 
-### Terramate 配置
-- 全域配置位於 `terraform/terramate.tm.hcl`
-- 環境特定配置位於 `terraform/stacks/dev/terramate.tm.hcl`
-- 預設 AWS 區域：ap-northeast-1
-- 狀態儲存使用 S3 + DynamoDB 鎖定機制
+### Terramate Configuration
+- Global configuration located at `terraform/terramate.tm.hcl`
+- Environment-specific configuration located at `terraform/stacks/dev/terramate.tm.hcl`
+- Default AWS region: ap-northeast-1
+- State storage uses S3 + DynamoDB locking mechanism
 
-## 常用命令
+## Common Commands
 
-### 基本 Terramate 操作
+### Basic Terramate Operations
 ```bash
-# 列出所有堆疊
+# List all stacks
 terramate list
 
-# 生成 Terraform 檔案
+# Create new stack
+terramate create path/to/stack
+
+# Generate Terraform files
 terramate generate
 
-# 初始化專案
-terramate init
+# Initialize project
+terramate run --tags networking -- terraform init
 
-# 規劃特定堆疊（以 networking 為例）
+# Plan specific stack (using networking as example)
 terramate run --tags networking -- terraform plan
 
-# 應用特定堆疊
+# Apply specific stack
 terramate run --tags networking -- terraform apply
 
-# 銷毀特定堆疊
+# Destroy specific stack
 terramate run --tags networking -- terraform destroy
 ```
 
-### 清理腳本
+### Cleanup Scripts
 ```bash
-# 清理所有 Terraform 產生的檔案
-./terraform_cleanup.sh
+# Clean up all Terraform-generated files
+./scripts/terraform_cleanup.sh
+
+# Setup SSM user environment, this is only for executing inside the EC2 instance
+./scripts/ssm_user_setup.sh
 ```
 
-## 模組開發準則
+## Module Development Guidelines
 
-### 命名規範
-- 資源前綴：`${env}-${module_name}`
-- 標籤結構：Environment, Project, ModuleName, Name, ManagedBy
+### Naming Conventions
+- Resource prefix: `${env}-${module_name}`
+- Tag structure: Environment, Project, ModuleName, Name, ManagedBy
 
-### 模組結構
-每個模組包含：
-- `main.tf` - 提供者配置
-- `locals.tf` - 本地變數和通用標籤
-- `variables.tf` - 輸入變數
-- `outputs.tf` - 輸出值
-- `common.tfvars` - 通用變數值
+### Module Structure
+Each module contains:
+- `main.tf` - Provider configuration
+- `locals.tf` - Local variables and common tags
+- `variables.tf` - Input variables
+- `outputs.tf` - Output values
+- `common.tfvars` - Common variable values
 
-### 堆疊結構
-每個堆疊包含：
-- `stack.tm.hcl` - Terramate 堆疊配置
-- 自動生成的 `_terramate_generated_*.tf` 檔案
+### Stack Structure
+Each stack contains:
+- `stack.tm.hcl` - Terramate stack configuration
+- Auto-generated `_terramate_generated_*.tf` files
 
-## 重要注意事項
+## Important Notes
 
-1. **版本控制要求**：執行 `terramate init/plan/apply` 前必須確保沒有未提交的變更
-2. **狀態管理**：使用 S3 + DynamoDB 進行遠端狀態管理
-3. **標籤策略**：所有資源都使用統一的標籤架構進行管理
-4. **區域設定**：預設為 ap-northeast-1，可透過全域變數調整
+1. **Version Control Requirements**: Ensure there are no uncommitted changes before running `terramate init/plan/apply`
+2. **State Management**: Uses S3 + DynamoDB for remote state management
+3. **Tagging Strategy**: All resources use a unified tagging architecture for management
+4. **Region Configuration**: Defaults to ap-northeast-1, adjustable via global variables
 
-## 開發工作流程
+## Development Workflow
 
-1. 在 `terraform/modules/` 下開發可重複使用的模組
-2. 在 `terraform/stacks/` 下建立環境特定的堆疊
-3. 使用 `terramate generate` 生成必要的 Terraform 檔案
-4. 使用標籤系統管理特定模組的部署
-5. 使用清理腳本清理開發環境
+1. Develop reusable modules under `terraform/modules/`
+2. Create environment-specific stacks under `terraform/stacks/`
+3. Use `terramate generate` to generate necessary Terraform files
+4. Use tag system to manage deployment of specific modules
+5. Use cleanup scripts to clean development environment
+
+## Available Modules
+
+### Compute Resources
+- `compute/ec2/private/isolated` - Isolated private EC2
+- `compute/ec2/public/bastion` - Bastion host
+- `compute/ec2/public/default_vpc_bastion` - Default VPC bastion host
+- `compute/ec2/public/eks-admin` - EKS management server
+
+### Storage Resources
+- `s3/archive-bucket` - Archive storage bucket
+- `s3/general-bucket` - General purpose bucket
+
+### Network Resources
+- `networking` - VPC, subnets, route tables, NAT gateways, etc.
+- `default-vpc` - Default VPC resources
+
+### Infrastructure
+- `state-storage` - Terraform state storage (S3 + DynamoDB)
+- `random-id-generator` - Random ID generator

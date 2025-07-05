@@ -9,7 +9,7 @@ stack {
   ]
 
   after = [
-    "tags:networking"
+    "/terraform/stacks/dev/networking"
   ]
 }
 
