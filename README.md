@@ -156,9 +156,10 @@ Like the apply operation, it will prompt for confirmation before destroying the 
 
 After the destroy operation, check the message and log into your public cloud interface (like AWS Console) to double-check the resource allocation status.
 
-### Setup Terminal and Related Tools for EC2 SSM User
-- Please copy the content of [ssm_user_setup.sh](./scripts/ssm_user_setup.sh) and save it to a `.sh` file under the home directory of the `ssm-user` once you launch the EC2 instance. The commands are listed below:
-
+### Setup Terminal and Related CLI Tools for EC2 SSM User
+- Please copy the content of [ssm_user_setup.sh](./scripts/ssm_user_setup.sh) and save it to a `.sh` file under the home directory of the `ssm-user` once you launch the EC2 instance. 
+- Then configure the variables in the `Configurations` section of the script.
+- Now you're ready to go, the commands are listed below:
   ```bash
   $ vi ssm_user_setup.sh
 
@@ -166,4 +167,4 @@ After the destroy operation, check the message and log into your public cloud in
   
   $ ./ssm_user_setup.sh
   ```
-
+- After the setup, you can also replace the content of `~/.zshrc` with [custom_zshrc](/scripts/custom_zshrc), which already contains most of the configurations for practicing the EKS.
