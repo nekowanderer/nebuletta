@@ -5,9 +5,6 @@ set -e
 USER=ssm-user
 AWS_REGION=
 AWS_ACCOUNT=
-AWS_SSO_START_URL=
-AWS_SSO_ACCOUNT_NAME=
-AWS_SSO_ROLE_NAME=
 CLUSTER_NAME=my-cluster-001
 
 if [ "$(whoami)" != "$USER" ]; then
@@ -119,38 +116,8 @@ fi
 echo "Configuring AWS CLI..."
 mkdir -p ~/.aws
 
-# Create AWS config file with SSO template
-# Please uncomment the following code block and replace the variabkes with your actual values
-
-# cat > ~/.aws/config << EOF
-# [default]
-# region = ${AWS_REGION}
-# output = json
-
-# [profile your-profile-name]
-# sso_start_url = ${
-# sso_region = ${AWS_REGION}
-# sso_account_name = ${AWS_SSO_ACCOUNT_NAME}
-# sso_account_id = ${AWS_ACCOUNT}
-# sso_role_name = ${AWS_SSO_ROLE_NAME}
-# region = ${AWS_REGION}
-# credential_process = aws-sso-util credential-process --profile your-profile-name
-# sso_auto_populated = true
-# EOF
-
 echo
 echo "🔧 AWS CLI is ready for configuration."
-echo "For IAM Identity Center (SSO), you have two options:"
-echo "1. Use existing profile: aws sso login --profile your_profile_name"
-echo "2. Or configure default profile with SSO settings in ~/.aws/config:"
-echo "   [default]"
-echo "   sso_start_url = https://your_domain.awsapps.com/start"
-echo "   sso_region = ${AWS_REGION}"
-echo "   sso_account_id = your_account_id"
-echo "   sso_role_name = your_role_name"
-echo "   region = ${AWS_REGION}"
-echo "   Then run: aws sso login --profile default"
-echo
 echo "For AWS CLI configuration, you can run:"
 echo "aws configure"
 echo "AWS Access Key ID [None]: your_access_key_id"
