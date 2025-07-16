@@ -42,7 +42,7 @@ generate_hcl "_terramate_generated_terraform_remote_state.tf" {
 generate_hcl "_terramate_generated_main.tf" {
   content {
     module "app_alb" {
-      source = "../../../modules/ecs-alb"
+      source = "../../../../modules/ecs-lab/ecs-alb"
       
       env               = global.env
       aws_region        = global.aws_region

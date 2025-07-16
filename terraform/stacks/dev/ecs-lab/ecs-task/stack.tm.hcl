@@ -6,10 +6,6 @@ stack {
     "dev",
     "ecs-task"
   ]
-
-    after = [
-    "/terraform/stacks/dev/networking"
-  ]
 }
 
 generate_hcl "_terramate_generated_backend.tf" {
@@ -26,23 +22,10 @@ generate_hcl "_terramate_generated_backend.tf" {
   }
 }
 
-generate_hcl "_terramate_generated_terraform_remote_state.tf" {
-  content {
-    data "terraform_remote_state" "infra_networking" {
-      backend = "s3"
-      config = {
-        bucket = global.backend.s3.bucket
-        key    = "networking/terraform.tfstate"
-        region = global.aws_region
-      }
-    }
-  }
-}
-
 generate_hcl "_terramate_generated_main.tf" {
   content {
     module "ecs_task" {
-      source = "../../../modules/ecs-task"
+      source = "../../../../modules/ecs-lab/ecs-task"
       
       env               = global.env
       aws_region        = global.aws_region
