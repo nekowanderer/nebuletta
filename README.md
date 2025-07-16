@@ -43,6 +43,7 @@ The project documentation is maintained in a separate repository, [click here to
     │   │   └── fargate
     │   │       ├── service
     │   │       └── task
+    │   ├── ecs-lab
     │   ├── networking
     │   ├── random-id-generator
     │   └── state-storage
@@ -52,6 +53,7 @@ The project documentation is maintained in a separate repository, [click here to
         │   │   └── ec2
         │   │       ├── private
         │   │       └── public
+        │   ├── ecs-lab
         │   ├── networking
         │   └── state-storage
         └── random-id-generator
