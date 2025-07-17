@@ -8,4 +8,4 @@ variable "keepers" {
   description = "A map of arbitrary strings that, when changed, will trigger recreation of resource."
   type        = map(string)
   default     = {}
-} 
+}

@@ -17,4 +17,4 @@ data "aws_subnets" "default" {
 data "aws_subnet" "default" {
   for_each = toset(data.aws_subnets.default.ids)
   id       = each.key
-} 
+}

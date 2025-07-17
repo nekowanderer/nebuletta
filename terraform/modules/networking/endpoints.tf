@@ -1,26 +1,26 @@
 # VPC Endpoints
 resource "aws_vpc_endpoint" "s3" {
-  vpc_id       = aws_vpc.this.id
-  service_name = "com.amazonaws.${var.aws_region}.s3"
+  vpc_id            = aws_vpc.this.id
+  service_name      = "com.amazonaws.${var.aws_region}.s3"
   vpc_endpoint_type = "Gateway"
   route_table_ids = concat(
     [aws_route_table.public.id],
     aws_route_table.private[*].id
   )
   tags = merge(
-    local.common_tags, { Name = "${local.prefix}-s3-endpoint" })
+  local.common_tags, { Name = "${local.prefix}-s3-endpoint" })
 }
 
 resource "aws_vpc_endpoint" "dynamodb" {
-  vpc_id       = aws_vpc.this.id
-  service_name = "com.amazonaws.${var.aws_region}.dynamodb"
+  vpc_id            = aws_vpc.this.id
+  service_name      = "com.amazonaws.${var.aws_region}.dynamodb"
   vpc_endpoint_type = "Gateway"
   route_table_ids = concat(
     [aws_route_table.public.id],
     aws_route_table.private[*].id
   )
   tags = merge(
-    local.common_tags, { Name = "${local.prefix}-dynamodb-endpoint" })
+  local.common_tags, { Name = "${local.prefix}-dynamodb-endpoint" })
 }
 
 # Interface Endpoints for Fargate
@@ -39,7 +39,7 @@ resource "aws_security_group" "vpc_endpoints" {
   }
 
   tags = merge(
-    local.common_tags, { Name = "${local.prefix}-vpc-endpoints-sg" })
+  local.common_tags, { Name = "${local.prefix}-vpc-endpoints-sg" })
 }
 
 # ECR API Endpoint
@@ -53,7 +53,7 @@ resource "aws_vpc_endpoint" "ecr_api" {
   private_dns_enabled = true
 
   tags = merge(
-    local.common_tags, { Name = "${local.prefix}-ecr-api-endpoint" })
+  local.common_tags, { Name = "${local.prefix}-ecr-api-endpoint" })
 }
 
 # ECR Docker Endpoint
@@ -67,7 +67,7 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
   private_dns_enabled = true
 
   tags = merge(
-    local.common_tags, { Name = "${local.prefix}-ecr-dkr-endpoint" })
+  local.common_tags, { Name = "${local.prefix}-ecr-dkr-endpoint" })
 }
 
 # CloudWatch Logs Endpoint
@@ -81,5 +81,5 @@ resource "aws_vpc_endpoint" "logs" {
   private_dns_enabled = true
 
   tags = merge(
-    local.common_tags, { Name = "${local.prefix}-logs-endpoint" })
-} 
+  local.common_tags, { Name = "${local.prefix}-logs-endpoint" })
+}
