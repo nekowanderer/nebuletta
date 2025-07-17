@@ -11,7 +11,7 @@ Nebuletta is an experimental Infrastructure-as-Code (IaC) project that uses Terr
 - **Terraform**: >= 1.11.4
 - **Terramate**: >= 0.13.1  
 - **AWS CLI**: >= 2.27.16
-- **AWS Provider**: ~> 5.97
+- **AWS Provider**: ~> 6.3
 - **Random Provider**: ~> 3.1.0
 
 ## Project Architecture

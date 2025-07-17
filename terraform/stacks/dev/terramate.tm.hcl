@@ -1,7 +1,6 @@
 globals {
     env        = "dev"
     aws_region = global.region
-    
 }
 
 globals "backend" "s3" {

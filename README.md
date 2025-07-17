@@ -21,7 +21,7 @@ The project documentation is maintained in a separate repository, [click here to
 - Terramate (>= 0.13.1)
 
 ### Required Providers
-- AWS Provider (~> 5.97)
+- AWS Provider (~> 6.3)
 - Random Provider (~> 3.1.0)
 
 ### Required Access
@@ -157,6 +157,16 @@ This is equivalent to performing the `terraform destroy` command under the netwo
 Like the apply operation, it will prompt for confirmation before destroying the specified resources. Type `yes` if you have carefully reviewed the details.
 
 After the destroy operation, check the message and log into your public cloud interface (like AWS Console) to double-check the resource allocation status.
+
+### Upgrade Terraform AWS Provider
+Once you upgrade the aws terraform provider, make sure to:
+```bash
+# Make sure to regenerate the .tf file
+$ terramate generate
+
+# Then, update the modules by specifying target tags
+$ terramate run --tags dev -- terraform init -upgrade
+```
 
 ### Setup Terminal and Related CLI Tools for EC2 SSM User
 - Please copy the content of [ssm_user_setup.sh](./scripts/ssm_user_setup.sh) and save it to a `.sh` file under the home directory of the `ssm-user` once you launch the EC2 instance. 
