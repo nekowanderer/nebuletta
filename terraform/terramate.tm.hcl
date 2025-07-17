@@ -17,7 +17,7 @@ generate_hcl "_terramate_generated_versions.tf" {
       required_providers {
         aws = {
           source  = "hashicorp/aws"
-          version = "~> 5.97"
+          version = "~> 6.3"
         }
       }
     }
