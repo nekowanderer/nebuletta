@@ -19,10 +19,6 @@ generate_hcl "_terramate_generated_versions.tf" {
           source  = "hashicorp/aws"
           version = "~> 5.97"
         }
-        random = {
-          source  = "hashicorp/random"
-          version = "~> 3.1.0"
-        }
       }
     }
   }
