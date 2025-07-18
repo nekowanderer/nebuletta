@@ -3,6 +3,27 @@
 > _The seed of a cloud-borne civilization,  
 > shaped in code, summoned into existence._
 
+## Table of Contents
+- [Introduction](#introduction)
+- [Prerequisites](#prerequisites)
+  - [Required Tools](#required-tools)
+  - [Required Providers](#required-providers)
+  - [Required Access](#required-access)
+- [Project Structure](#project-structure)
+- [Initialize the State Storage](#initialize-the-state-storage)
+- [Recommended Development Workflow](#recommended-development-workflow)
+- [Basic Commands](#basic-commands)
+  - [List Stacks](#list-stacks)
+  - [Code Quality Checks](#code-quality-checks)
+  - [Create a new stack](#create-a-new-stack)
+  - [Generate .tf Files for Stacks](#generate-tf-files-for-stacks)
+  - [Initialize the Project](#initialize-the-project)
+  - [Plan a Specific Stack](#plan-a-specific-stack)
+  - [Apply a Specific Stack](#apply-a-specific-stack)
+  - [Destroy a Specific Stack](#destroy-a-specific-stack)
+  - [Upgrade Terraform AWS Provider](#upgrade-terraform-aws-provider)
+  - [Setup Terminal and Related CLI Tools for EC2 SSM User](#setup-terminal-and-related-cli-tools-for-ec2-ssm-user)
+
 ## Introduction
 
 **Nebuletta** is an experimental Infrastructure-as-Code (IaC) project designed to rapidly provision self-managed cloud infrastructure using [Terraform](https://www.terraform.io/) on public cloud platforms.
@@ -25,9 +46,9 @@ The project documentation is maintained in a separate repository, [click here to
 - Random Provider (~> `3.1.0`)
 
 ### Required Access
-- An AWS account with sufficient permissions/roles/policies for executing the tasks defined in the Terraform scripts
+- An AWS account with sufficient permissions/roles/policies for executing the tasks defined in the Terraform scripts.
 
-## How It Works
+## Project Structure
 
 ```bash
 .
@@ -53,6 +74,45 @@ The project documentation is maintained in a separate repository, [click here to
 | `terraform/stacks/` | Terramate Stacks | Environment-specific configurations such as `dev`/`staging`/`production` |
 
 You can compose the stack according to your requirements by adding different subfolders under the specific stack folder and writing the appropriate `stack.tm.hcl` file for each module.
+
+## Initialize the State Storage
+- For every Terraform module, we need to provide state storage to maintain the infrastructure state and ensure consistency across team collaboration.
+- The state storage module doesn't use a remote backend since it creates the foundational infrastructure for all other Terraform modules. This solves the classic "chicken and egg" problem in Terraform infrastructure: you need the S3 bucket and DynamoDB table to exist before other modules can use them as remote backends.
+- To achieve this, first navigate to `terraform/modules/state-storage`, where you'll need to adjust some parameters to create the storage in your AWS environment.
+- Prerequisites:
+  - **common.tfvars**
+    - Update all input variables according to your requirements. If you plan to set up infrastructure via Terramate, you can leave the defaults.
+  - **kms.tf**
+    - Update the principal of `AllowSSOUserAccess` inside the `aws_kms_key_policy`.
+    - If you're not using AWS SSO users, please adjust it according to the Terraform official document.
+- **For Terraform module style**
+  ```bash
+  # Navigate to terraform/modules/state-storage
+
+  $ terraform init
+
+  $ terraform plan -var-file="common.tfvars"
+
+  $ terraform apply -var-file="common.tfvars"
+
+  # Then you should be able to see the related components in the AWS console
+  ```
+  - You can take this [PR](https://github.com/nekowanderer/nebuletta/pull/3) as the example.
+
+- **For Terramate stack style**
+  ```bash
+  # Navigate to terraform/stacks/state-storage
+
+  $ terramate generate
+
+  $ terramate run --tags dev-state-storage -- terraform init
+
+  $ terramate run --tags dev-state-storage -- terraform plan
+
+  $ terramate run --tags dev-state-storage -- terraform apply
+
+  # Then you should be able to see the related components in the AWS console
+  ```
 
 ## Recommended Development Workflow
 ```bash
