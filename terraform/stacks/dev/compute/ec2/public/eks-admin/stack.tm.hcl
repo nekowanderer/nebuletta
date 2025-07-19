@@ -4,8 +4,7 @@ stack {
   id          = "19600efc-14fa-4456-9e8a-8607ab04842d"
   tags = [
     "dev",
-    "infrastructure",
-    "eks-admin"
+    "dev-eks-admin"
   ]
 
   after = [

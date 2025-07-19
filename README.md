@@ -10,6 +10,10 @@
   - [Required Providers](#required-providers)
   - [Required Access](#required-access)
 - [Project Structure](#project-structure)
+- [Remote Module Versioning](#remote-module-versioning)
+  - [Environment-Specific Module Strategy](#environment-specific-module-strategy)
+  - [Version Control Workflow](#version-control-workflow)
+  - [Module Source Configuration](#module-source-configuration)
 - [Initialize the State Storage](#initialize-the-state-storage)
 - [Recommended Development Workflow](#recommended-development-workflow)
 - [Basic Commands](#basic-commands)
@@ -75,9 +79,109 @@ The project documentation is maintained in a separate repository, [click here to
 
 You can compose the stack according to your requirements by adding different subfolders under the specific stack folder and writing the appropriate `stack.tm.hcl` file for each module.
 
+## Remote Module Versioning
+
+This project implements a sophisticated module versioning strategy using Git remote modules, enabling environment-specific deployment approaches while maintaining code consistency and stability.
+
+### Environment-Specific Module Strategy
+
+**Development Environment (`dev`)**:
+- Uses **local modules** for rapid development and testing
+- Source: e.g., `"../../../modules/<module-name>"`
+- Allows immediate code changes without version management overhead
+- Perfect for active development and experimentation
+
+**Staging/Production Environments (`staging`, `prod`)**:
+- Uses **Git remote modules** with version pinning
+- Source: `"git::ssh://git@github.com/nekowanderer/nebuletta.git//terraform/modules/<module-name>?ref=<version>"`
+- Ensures consistent, tested infrastructure deployments
+- Prevents unintended changes from affecting stable environments
+
+### Version Control Workflow
+
+#### 1. Development Phase
+```hcl
+# terraform/stacks/dev/<module>/stack.tm.hcl
+generate_hcl "_terramate_generated_main.tf" {
+  content {
+    module "<module_name>" {
+      source = "../../../modules/<module-name>"
+      # ... other configuration
+    }
+  }
+}
+```
+
+#### 2. Release Phase
+```bash
+# Create and push version tag
+$ git tag v1.0.0
+$ git push origin v1.0.0
+```
+
+#### 3. Staging/Production Deployment
+```hcl
+# terraform/stacks/staging/<module>/stack.tm.hcl
+generate_hcl "_terramate_generated_main.tf" {
+  content {
+    module "<module_name>" {
+      source = "git::ssh://git@github.com/nekowanderer/nebuletta.git//terraform/modules/<module-name>?ref=v1.0.0"
+      # ... other configuration
+    }
+  }
+}
+```
+
+### Module Source Configuration
+
+#### Git Remote Module URL Format
+```
+git::ssh://git@github.com/nekowanderer/nebuletta.git//terraform/modules/<module-name>?ref=<version>
+```
+
+**Components:**
+- `git::ssh://` - Protocol specification
+- `git@github.com/nekowanderer/nebuletta.git` - Repository URL
+- `//terraform/modules/<module-name>` - Path to module within repository
+- `?ref=<version>` - Git reference (tag, branch, or commit hash)
+
+#### Environment Configuration Examples
+
+**Development Environment:**
+```hcl
+module "networking" {
+  source = "../../../modules/networking"
+  vpc_cidr = "10.0.0.0/16"
+  # ... other variables
+}
+```
+
+**Staging Environment:**
+```hcl
+module "networking" {
+  source = "git::ssh://git@github.com/nekowanderer/nebuletta.git//terraform/modules/networking?ref=v4.0.0"
+  vpc_cidr = "10.1.0.0/16"  # Different CIDR to avoid conflicts
+  # ... other variables
+}
+```
+
+**Benefits:**
+- **Version Locking**: Staging/production environments use stable, tested versions
+- **Development Speed**: Local modules enable rapid iteration
+- **Environment Isolation**: Different VPC CIDRs and configurations per environment
+- **Module Reusability**: Same modules across environments with different configurations
+- **Controlled Upgrades**: Explicit version upgrades through git tags
+
 ## Initialize the State Storage
 - For every Terraform module, we need to provide state storage to maintain the infrastructure state and ensure consistency across team collaboration.
 - The state storage module doesn't use a remote backend since it creates the foundational infrastructure for all other Terraform modules. This solves the classic "chicken and egg" problem in Terraform infrastructure: you need the S3 bucket and DynamoDB table to exist before other modules can use them as remote backends.
+- The following table describes the purpose of each component of the state storage in this project:
+  | Component | Purpose | Features | Naming Convention |
+  |-----------|---------|----------|-------------------|
+  | **S3 Bucket** | Stores Terraform state files (`.tfstate`) | Versioning enabled, encryption at rest, cross-region replication support | `<env>-state-storage-s3` |
+  | **DynamoDB Table** | Provides state locking mechanism to prevent concurrent modifications | Stores lock information with TTL, prevents race conditions | `<env>-state-storage-locks` |
+  | **KMS Key** | Encrypts state files stored in S3 for enhanced security | Customer-managed encryption, access control via IAM policies | `<env>-state-storage-key` |
+
 - To achieve this, first navigate to `terraform/modules/state-storage`, where you'll need to adjust some parameters to create the storage in your AWS environment.
 - Prerequisites:
   - **common.tfvars**

@@ -4,7 +4,7 @@ stack {
   id          = "2fc47019-16ca-4f61-89d8-9aaf73e10032"
   tags = [
     "dev",
-    "ecs-cluster"
+    "dev-ecs-cluster"
   ]
 }
 

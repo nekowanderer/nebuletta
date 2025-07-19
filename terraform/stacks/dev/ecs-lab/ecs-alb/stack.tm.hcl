@@ -4,7 +4,7 @@ stack {
   id          = "3c5c0754-0c08-4d24-8e16-74127cf280ed"
   tags = [
     "dev",
-    "ecs-alb"
+    "dev-ecs-alb"
   ]
 
   after = [

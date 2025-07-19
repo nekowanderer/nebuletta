@@ -4,8 +4,7 @@ stack {
   id          = "f0947757-dfc1-421a-a429-b7ccb4dd0092"
   tags = [
     "dev",
-    "infrastructure",
-    "bastion"
+    "dev-bastion"
   ]
 
   after = [

@@ -4,7 +4,7 @@ stack {
   id          = "e84aebda-b4d1-4a0a-b2a6-836d024c69a6"
   tags = [
     "dev",
-    "ecs-task"
+    "dev-ecs-task"
   ]
 }
 

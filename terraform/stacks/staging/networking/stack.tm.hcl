@@ -1,10 +1,10 @@
 stack {
   name        = "networking"
-  description = "Networking of the infrastructure"
-  id          = "4c124d0a-6fb2-450b-9f08-19cbd000335c"
+  description = "networking"
+  id          = "80476660-3586-42cf-893e-0c340d401ea4"
   tags = [
-    "dev",
-    "dev-networking"
+    "staging",
+    "staging-networking"
   ]
 }
 
@@ -25,16 +25,16 @@ generate_hcl "_terramate_generated_backend.tf" {
 generate_hcl "_terramate_generated_main.tf" {
   content {
     module "networking" {
-      source = "../../../modules/networking"
+      source = "git::ssh://git@github.com/nekowanderer/nebuletta.git//terraform/modules/networking?ref=v4.0.0"
       env     = global.env
       aws_region = global.aws_region
       project = global.project.name
       module_name = "networking"
       managed_by = global.managed_by
-      vpc_cidr = "10.0.0.0/16"
+      vpc_cidr = "10.1.0.0/16"
       azs = ["ap-northeast-1a", "ap-northeast-1c"]
-      public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
-      private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]
+      public_subnet_cidrs = ["10.1.1.0/24", "10.1.2.0/24"]
+      private_subnet_cidrs = ["10.1.11.0/24", "10.1.12.0/24"]
     }
   }
 }
