@@ -4,8 +4,7 @@ stack {
   id          = "400fbc60-35dd-4998-9804-0a58ed3b3c61"
   tags = [
     "dev",
-    "s3",
-    "archive-bucket"
+    "dev-archive-bucket"
   ]
 }
 

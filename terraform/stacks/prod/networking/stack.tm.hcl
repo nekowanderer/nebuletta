@@ -1,10 +1,10 @@
 stack {
   name        = "networking"
-  description = "Networking of the infrastructure"
-  id          = "4c124d0a-6fb2-450b-9f08-19cbd000335c"
+  description = "networking"
+  id          = "4feb444c-2dc8-432c-96aa-951c4677b44f"
   tags = [
-    "dev",
-    "dev-networking"
+    "prod",
+    "prod-networking"
   ]
 }
 
@@ -31,10 +31,10 @@ generate_hcl "_terramate_generated_main.tf" {
       project = global.project.name
       module_name = "networking"
       managed_by = global.managed_by
-      vpc_cidr = "10.0.0.0/16"
+      vpc_cidr = "10.2.0.0/16"
       azs = ["ap-northeast-1a", "ap-northeast-1c"]
-      public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
-      private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]
+      public_subnet_cidrs = ["10.2.1.0/24", "10.2.2.0/24"]
+      private_subnet_cidrs = ["10.2.11.0/24", "10.2.12.0/24"]
     }
   }
 }

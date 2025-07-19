@@ -4,7 +4,7 @@ stack {
   id          = "e318b0be-bc6d-4ca2-ba62-f2e76bac9d3e"
   tags = [
     "dev",
-    "default-vpc-bastion"
+    "dev-default-vpc-bastion"
   ]
 
   after = [
