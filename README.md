@@ -3,6 +3,27 @@
 > _The seed of a cloud-borne civilization,  
 > shaped in code, summoned into existence._
 
+## Table of Contents
+- [Introduction](#introduction)
+- [Prerequisites](#prerequisites)
+  - [Required Tools](#required-tools)
+  - [Required Providers](#required-providers)
+  - [Required Access](#required-access)
+- [Project Structure](#project-structure)
+- [Initialize the State Storage](#initialize-the-state-storage)
+- [Recommended Development Workflow](#recommended-development-workflow)
+- [Basic Commands](#basic-commands)
+  - [List Stacks](#list-stacks)
+  - [Code Quality Checks](#code-quality-checks)
+  - [Create a new stack](#create-a-new-stack)
+  - [Generate .tf Files for Stacks](#generate-tf-files-for-stacks)
+  - [Initialize the Project](#initialize-the-project)
+  - [Plan a Specific Stack](#plan-a-specific-stack)
+  - [Apply a Specific Stack](#apply-a-specific-stack)
+  - [Destroy a Specific Stack](#destroy-a-specific-stack)
+  - [Upgrade Terraform AWS Provider](#upgrade-terraform-aws-provider)
+  - [Setup Terminal and Related CLI Tools for EC2 SSM User](#setup-terminal-and-related-cli-tools-for-ec2-ssm-user)
+
 ## Introduction
 
 **Nebuletta** is an experimental Infrastructure-as-Code (IaC) project designed to rapidly provision self-managed cloud infrastructure using [Terraform](https://www.terraform.io/) on public cloud platforms.
@@ -16,47 +37,34 @@ The project documentation is maintained in a separate repository, [click here to
 ## Prerequisites
 
 ### Required Tools
-- AWS CLI (>= 2.27.16) installed on your local machine
-- Terraform (>= 1.11.4)
-- Terramate (>= 0.13.1)
+- AWS CLI (>= `2.27.16`) installed on your local machine
+- Terraform (>= `1.11.4`)
+- Terramate (>= `0.13.1`)
 
 ### Required Providers
-- AWS Provider (~> 6.3)
-- Random Provider (~> 3.1.0)
+- AWS Provider (~> `6.3`)
+- Random Provider (~> `3.1.0`)
 
 ### Required Access
-- An AWS account with sufficient permissions/roles/policies for executing the tasks defined in the Terraform scripts
+- An AWS account with sufficient permissions/roles/policies for executing the tasks defined in the Terraform scripts.
 
-## How It Works
+## Project Structure
 
-```shell
+```bash
 .
 ├── scripts
 │   ├── ssm_user_setup.sh
 │   └── terraform_cleanup.sh
 └── terraform
     ├── modules
-    │   ├── compute
-    │   │   ├── ec2
-    │   │   │   ├── private
-    │   │   │   └── public
-    │   │   └── fargate
-    │   │       ├── service
-    │   │       └── task
-    │   ├── ecs-lab
     │   ├── networking
-    │   ├── random-id-generator
+    │   ├── ...
     │   └── state-storage
     └── stacks
         └── dev
-        │   ├── compute
-        │   │   └── ec2
-        │   │       ├── private
-        │   │       └── public
-        │   ├── ecs-lab
-        │   ├── networking
-        │   └── state-storage
-        └── random-id-generator
+            ├── networking
+            ├── ...
+            └── state-storage
 ```
 
 | Directory | Purpose | Description |
@@ -67,33 +75,148 @@ The project documentation is maintained in a separate repository, [click here to
 
 You can compose the stack according to your requirements by adding different subfolders under the specific stack folder and writing the appropriate `stack.tm.hcl` file for each module.
 
+## Initialize the State Storage
+- For every Terraform module, we need to provide state storage to maintain the infrastructure state and ensure consistency across team collaboration.
+- The state storage module doesn't use a remote backend since it creates the foundational infrastructure for all other Terraform modules. This solves the classic "chicken and egg" problem in Terraform infrastructure: you need the S3 bucket and DynamoDB table to exist before other modules can use them as remote backends.
+- To achieve this, first navigate to `terraform/modules/state-storage`, where you'll need to adjust some parameters to create the storage in your AWS environment.
+- Prerequisites:
+  - **common.tfvars**
+    - Update all input variables according to your requirements. If you plan to set up infrastructure via Terramate, you can leave the defaults.
+  - **kms.tf**
+    - Update the principal of `AllowSSOUserAccess` inside the `aws_kms_key_policy`.
+    - If you're not using AWS SSO users, please adjust it according to the Terraform official document.
+- **For Terraform module style**
+  ```bash
+  # Navigate to terraform/modules/state-storage
+
+  $ terraform init
+
+  $ terraform plan -var-file="common.tfvars"
+
+  $ terraform apply -var-file="common.tfvars"
+
+  # Then you should be able to see the related components in the AWS console
+  ```
+  - You can take this [PR](https://github.com/nekowanderer/nebuletta/pull/3) as the example.
+
+- **For Terramate stack style**
+  ```bash
+  # Navigate to terraform/stacks/state-storage
+
+  $ terramate generate
+
+  $ terramate run --tags dev-state-storage -- terraform init
+
+  $ terramate run --tags dev-state-storage -- terraform plan
+
+  $ terramate run --tags dev-state-storage -- terraform apply
+
+  # Then you should be able to see the related components in the AWS console
+  ```
+
+## Recommended Development Workflow
+```bash
+# 1. Format source code in modules
+$ cd terraform/modules/<module-name>
+$ terraform fmt
+
+# 2. Generate the terramate stack
+$ terramate create path/to/stack
+
+# 3. Write the stack.tm.hcl for the stack
+$ vi path_to_stack/stack.tm.hcl
+
+# 4. Generate Terramate files
+$ terramate generate
+
+# 5. Validate complete configuration
+$ terramate run --tags <tag> -- terraform validate
+
+# 6. Init the stack
+$ terramate run --tags <tag> -- terraform init
+
+# 7. Plan changes
+$ terramate run --tags <tag> -- terraform plan
+
+# 8. Apply changes
+$ terramate run --tags <tag> -- terraform apply
+```
+
 ## Basic Commands
 
 ### List Stacks
 Navigate to the project root and execute:
-```shell
-terramate list
+```bash
+$ terramate list
 ```
 This will show you the stacks that exist in this project.
 
+### Code Quality Checks
+Before deploying infrastructure, it's recommended to run these commands to ensure code quality:
+
+#### Architecture-Specific Workflow
+In this project, Terraform modules under `terraform/modules/` contain raw source code that serves as reusable components. These modules are not intended to be executed directly as infrastructure deployments. Instead, Terramate generates the actual executable Terraform files in the `terraform/stacks/` directories for environment-specific deployments.
+
+**Due to this architecture:**
+
+1. **Format checking** can be performed in both locations:
+   - **Module level**: `terraform fmt -check` (for source code formatting)
+   - **Stack level**: `terramate run --tags <tag> -- terraform fmt -check` (for generated deployment files)
+
+2. **Syntax validation** must be performed at the stack level only:
+   - **Module level validation will fail** because modules lack provider configurations and complete context
+   - **Stack level validation is required**: `terramate run --tags <tag> -- terraform validate`
+   - This is because only the generated stack files contain the complete provider configurations, variable definitions, and deployment context necessary for proper validation
+
+#### Format Check
+```bash
+# Format source code in modules
+$ cd terraform/modules/<module-name>
+$ terraform fmt
+
+# Check formatting via Terramate (for generated files)
+$ terramate run --tags <tag> -- terraform fmt -check
+```
+
+#### Syntax Validation
+```bash
+# If validate under the module folder (take module/networking as example):
+$ terraform validate
+╷
+│ Error: Missing required provider
+│
+│ This configuration requires provider registry.terraform.io/hashicorp/aws, but that provider isn't available. You may be able to install it automatically by running:
+│   terraform init
+╵
+╷
+│ Error: Missing required provider
+│
+│ This configuration requires provider registry.terraform.io/hashicorp/null, but that provider isn't available. You may be able to install it automatically by running:
+│   terraform init
+╵
+
+# Validate complete configuration via Terramate
+$ terramate run --tags <tag> -- terraform validate
+```
+
 ### Create a new stack
 Please adjust the path in the following command according to your current path:
-```shell
-terramate create path/to/stack
+```bash
+$ terramate create path/to/stack
 ```
 This will help to generate the `stack.tm.hcl` with dedicated UUID under the created stack folder.
 
 ### Generate .tf Files for Stacks
 Navigate to the project root and execute:
-```shell
-terramate generate
+```bash
+$ terramate generate
 ```
 This will generate all the Terraform files defined in the stack.tm.hcl for each stack.
 
 ### Initialize the Project
 Navigate to the project root or the specific stack you would like to initialize, and execute:
-```shell
-terramate run --tags networking -- terraform init
+```bash
+$ terramate run --tags networking -- terraform init
 ```
 
 ⚠️ **Warning**: For init/plan/apply via Terramate, ensure you don't have any unstaged changes in your version control system (like Git). Otherwise, you'll see a message like:
@@ -111,20 +234,23 @@ For this situation, please stage/commit the changes first before continuing.
 
 ### Plan a Specific Stack
 It's a good practice to plan stacks by tags. For example, to plan the networking module, execute the following command under the project root:
-```shell
-terramate run --tags networking -- terraform plan
+```bash
+$ terramate run --tags networking -- terraform plan
 ```
 This is equivalent to performing the `terraform plan` command under the networking module independently.
 
 ### Apply a Specific Stack
 Similar to the plan command, to apply the networking module, execute the following command under the project root:
-```shell
-terramate run --tags networking -- terraform apply
+```bash
+$ terramate run --tags networking -- terraform apply
+
+# Auto approve (be careful when using this)
+$ terramate run --tags networking -- terraform apply -auto-approve
 ```
 This is equivalent to performing the `terraform apply` command under the networking module independently.
 
 You'll then see the following message in the terminal:
-```shell
+```bash
 Do you want to perform these actions?
   Terraform will perform the actions described above.
   Only 'yes' will be accepted to approve.
@@ -135,7 +261,7 @@ Do you want to perform these actions?
 Type `yes` if you're sure all the planned resources meet your requirements. Otherwise, cancel the apply operation by typing any other word and adjust the script.
 
 After the apply operation, check the message which should look like:
-```shell
+```bash
 Apply complete! Resources: xx added, 0 changed, 0 destroyed.
 
 Outputs:
@@ -149,8 +275,8 @@ Verify that all resources are arranged as desired.
 
 ### Destroy a Specific Stack
 Again, using the networking module as an example, to destroy it, execute:
-```shell
-terramate run --tags networking -- terraform destroy
+```bash
+$ terramate run --tags networking -- terraform destroy
 ```
 This is equivalent to performing the `terraform destroy` command under the networking module independently.
 

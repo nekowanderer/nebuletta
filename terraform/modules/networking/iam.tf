@@ -33,11 +33,11 @@ resource "aws_iam_role" "flow_log_role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 
   tags = merge(
-    local.common_tags, { Name = "${local.prefix}-flow-log-role" })
+  local.common_tags, { Name = "${local.prefix}-flow-log-role" })
 }
 
 resource "aws_iam_role_policy" "flow_log_policy" {
   name   = "${local.prefix}-flow-log-policy"
   role   = aws_iam_role.flow_log_role.id
   policy = data.aws_iam_policy_document.flow_log.json
-} 
+}
