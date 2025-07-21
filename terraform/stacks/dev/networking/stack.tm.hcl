@@ -32,9 +32,7 @@ generate_hcl "_terramate_generated_main.tf" {
       module_name = "networking"
       managed_by = global.managed_by
       vpc_cidr = "10.0.0.0/16"
-      azs = ["ap-northeast-1a", "ap-northeast-1c"]
-      public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
-      private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]
+      max_azs = 6
     }
   }
 }
@@ -87,6 +85,18 @@ generate_hcl "_terramate_generated_outputs.tf" {
 
     output "vpc_endpoint_logs_id" {
       value = module.networking.vpc_endpoint_logs_id
+    }
+
+    output "availability_zones" {
+      value = module.networking.availability_zones
+    }
+
+    output "public_subnet_cidrs" {
+      value = module.networking.public_subnet_cidrs
+    }
+
+    output "private_subnet_cidrs" {
+      value = module.networking.private_subnet_cidrs
     }
   }
 }

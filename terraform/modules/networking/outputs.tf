@@ -56,3 +56,18 @@ output "vpc_endpoint_logs_id" {
   description = "The ID of the CloudWatch Logs VPC endpoint"
   value       = aws_vpc_endpoint.logs.id
 }
+
+output "availability_zones" {
+  description = "List of availability zones used"
+  value       = local.available_azs
+}
+
+output "public_subnet_cidrs" {
+  description = "List of public subnet CIDR blocks"
+  value       = local.public_subnet_cidrs
+}
+
+output "private_subnet_cidrs" {
+  description = "List of private subnet CIDR blocks"
+  value       = local.private_subnet_cidrs
+}

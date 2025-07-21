@@ -30,17 +30,13 @@ variable "vpc_cidr" {
   type        = string
 }
 
-variable "azs" {
-  description = "Availability zones"
-  type        = list(string)
-}
-
-variable "public_subnet_cidrs" {
-  description = "CIDR blocks for public subnets"
-  type        = list(string)
-}
-
-variable "private_subnet_cidrs" {
-  description = "CIDR blocks for private subnets"
-  type        = list(string)
+variable "max_azs" {
+  description = "Maximum number of AZs to use"
+  type        = number
+  default     = 2
+  
+  validation {
+    condition     = var.max_azs >= 1 && var.max_azs <= 6
+    error_message = "max_azs must be between 1 and 6."
+  }
 }
