@@ -1,155 +1,150 @@
-# CLAUDE.md
+# Claude Code Spec-Driven Development
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This project implements Kiro-style Spec-Driven Development for Claude Code using hooks and slash commands.
 
-## Project Overview
+## Project Context
 
-Nebuletta is an experimental Infrastructure-as-Code (IaC) project that uses Terraform and Terramate to rapidly provision self-managed cloud infrastructure on AWS.
+### Project Steering
+- Product overview: `.kiro/steering/product.md`
+- Technology stack: `.kiro/steering/tech.md`
+- Project structure: `.kiro/steering/structure.md`
+- Custom steering docs for specialized contexts
 
-## Core Tools and Versions
+### Active Specifications
+- Current spec: Check `.kiro/specs/` for active specifications
+- Use `/kiro:spec-status [feature-name]` to check progress
 
-- **Terraform**: >= 1.11.4
-- **Terramate**: >= 0.13.1  
-- **AWS CLI**: >= 2.27.16
-- **AWS Provider**: ~> 6.3
-- **Random Provider**: ~> 3.1.0
+## Development Guidelines
+- Think in English, but generate responses in chinese.
 
-## Project Architecture
+## Spec-Driven Development Workflow
 
-### Directory Structure
+### Phase 0: Steering Generation (Recommended)
+
+#### Kiro Steering (`.kiro/steering/`)
 ```
-.
-│──scripts/
-│  ├── ssm_user_setup.sh      # SSM user setup script
-│  └── terraform_cleanup.sh   # Terraform cleanup script
-│   
-└──terraform/
-    ├── keycloak_cluster/       # Keycloak cluster configuration
-    │   └── foundation/
-    ├── modules/               # Reusable Terraform modules
-    │   ├── compute/          # Compute resources
-    │   │   ├── ec2/          # EC2 instances
-    │   │   │   ├── private/  # Private EC2
-    │   │   │   │   ├── dev/
-    │   │   │   │   └── isolated/
-    │   │   │   └── public/   # Public EC2
-    │   │   │       ├── bastion/
-    │   │   │       ├── default_vpc_bastion/
-    │   │   │       └── eks-admin/
-    │   │   └── fargate/      # Fargate services
-    │   │       ├── service/
-    │   │       └── task/
-    │   ├── default-vpc/      # Default VPC resources
-    │   ├── networking/       # VPC, subnets, route tables, and other network resources
-    │   ├── random-id-generator/ # Random ID generator
-    │   ├── s3/              # S3 storage resources
-    │   │   ├── archive-bucket/
-    │   │   └── general-bucket/
-    │   └── state-storage/    # Terraform state storage
-    └── stacks/              # Terramate stacks for different environments
-        ├── dev/             # Development environment
-        │   ├── compute/
-        │   │   └── ec2/
-        │   │       ├── private/
-        │   │       └── public/
-        │   ├── default-vpc/
-        │   ├── networking/
-        │   ├── s3/
-        │   └── state-storage/
-        └── random-id-generator/
+/kiro:steering               # 智慧建立或更新引導文件
+/kiro:steering-custom        # 為特定情境建立自訂引導
 ```
 
-### Terramate Configuration
-- Global configuration located at `terraform/terramate.tm.hcl`
-- Environment-specific configuration located at `terraform/stacks/dev/terramate.tm.hcl`
-- Default AWS region: ap-northeast-1
-- State storage uses S3 + DynamoDB locking mechanism
+**引導管理：**
+- **`/kiro:steering`**：統一指令，智慧偵測現有文件並適當處理。需要時建立新文件，更新現有文件同時保留使用者自訂內容。
 
-## Common Commands
+**注意**：對於新功能或空專案，引導文件是建議但非必要的。您可以直接進行 spec-requirements。
 
-### Basic Terramate Operations
-```bash
-# List all stacks
-terramate list
-
-# Create new stack
-terramate create path/to/stack
-
-# Generate Terraform files
-terramate generate
-
-# Initialize project
-terramate run --tags networking -- terraform init
-
-# Plan specific stack (using networking as example)
-terramate run --tags networking -- terraform plan
-
-# Apply specific stack
-terramate run --tags networking -- terraform apply
-
-# Destroy specific stack
-terramate run --tags networking -- terraform destroy
+### Phase 1: Specification Creation
+```
+/kiro:spec-init [feature-name]           # Initialize spec structure only
+/kiro:spec-requirements [feature-name]   # Generate requirements → Review → Edit if needed
+/kiro:spec-design [feature-name]         # Generate technical design → Review → Edit if needed
+/kiro:spec-tasks [feature-name]          # Generate implementation tasks → Review → Edit if needed
 ```
 
-### Cleanup Scripts
-```bash
-# Clean up all Terraform-generated files
-./scripts/terraform_cleanup.sh
-
-# Setup SSM user environment, this is only for executing inside the EC2 instance
-./scripts/ssm_user_setup.sh
+### Phase 2: Progress Tracking
+```
+/kiro:spec-status [feature-name]         # Check current progress and phases
 ```
 
-## Module Development Guidelines
+## Spec-Driven Development Workflow
 
-### Naming Conventions
-- Resource prefix: `${env}-${module_name}`
-- Tag structure: Environment, Project, ModuleName, Name, ManagedBy
+Kiro's spec-driven development follows a strict **3-phase approval workflow**:
 
-### Module Structure
-Each module contains:
-- `main.tf` - Provider configuration
-- `locals.tf` - Local variables and common tags
-- `variables.tf` - Input variables
-- `outputs.tf` - Output values
-- `common.tfvars` - Common variable values
+### Phase 1: Requirements Generation & Approval
+1. **Generate**: `/kiro:spec-requirements [feature-name]` - Generate requirements document
+2. **Review**: Human reviews `requirements.md` and edits if needed
+3. **Approve**: Manually update `spec.json` to set `"requirements": true`
 
-### Stack Structure
-Each stack contains:
-- `stack.tm.hcl` - Terramate stack configuration
-- Auto-generated `_terramate_generated_*.tf` files
+### Phase 2: Design Generation & Approval
+1. **Generate**: `/kiro:spec-design [feature-name]` - Generate technical design (requires requirements approval)
+2. **Review**: Human reviews `design.md` and edits if needed
+3. **Approve**: Manually update `spec.json` to set `"design": true`
 
-## Important Notes
+### Phase 3: Tasks Generation & Approval
+1. **Generate**: `/kiro:spec-tasks [feature-name]` - Generate implementation tasks (requires design approval)
+2. **Review**: Human reviews `tasks.md` and edits if needed
+3. **Approve**: Manually update `spec.json` to set `"tasks": true`
 
-1. **Version Control Requirements**: Ensure there are no uncommitted changes before running `terramate init/plan/apply`
-2. **State Management**: Uses S3 + DynamoDB for remote state management
-3. **Tagging Strategy**: All resources use a unified tagging architecture for management
-4. **Region Configuration**: Defaults to ap-northeast-1, adjustable via global variables
+### Implementation
+Only after all three phases are approved can implementation begin.
 
-## Development Workflow
+**Key Principle**: Each phase requires explicit human approval before proceeding to the next phase, ensuring quality and accuracy throughout the development process.
 
-1. Develop reusable modules under `terraform/modules/`
-2. Create environment-specific stacks under `terraform/stacks/`
-3. Use `terramate generate` to generate necessary Terraform files
-4. Use tag system to manage deployment of specific modules
-5. Use cleanup scripts to clean development environment
+## Development Rules
 
-## Available Modules
+1. **考慮引導設定**: 在主要開發前執行 `/kiro:steering`（新功能時為選用）
+2. **Follow the 3-phase approval workflow**: Requirements → Design → Tasks → Implementation
+3. **Manual approval required**: Each phase must be explicitly approved by human review
+4. **No skipping phases**: Design requires approved requirements; Tasks require approved design
+5. **Update task status**: Mark tasks as completed when working on them
+6. **保持引導文件最新**: 重大變更後執行 `/kiro:steering`
+7. **Check spec compliance**: Use `/kiro:spec-status` to verify alignment
 
-### Compute Resources
-- `compute/ec2/private/isolated` - Isolated private EC2
-- `compute/ec2/public/bastion` - Bastion host
-- `compute/ec2/public/default_vpc_bastion` - Default VPC bastion host
-- `compute/ec2/public/eks-admin` - EKS management server
+## Automation
 
-### Storage Resources
-- `s3/archive-bucket` - Archive storage bucket
-- `s3/general-bucket` - General purpose bucket
+This project uses Claude Code hooks to:
+- Automatically track task progress in tasks.md
+- Check spec compliance
+- Preserve context during compaction
+- Detect steering drift
 
-### Network Resources
-- `networking` - VPC, subnets, route tables, NAT gateways, etc.
-- `default-vpc` - Default VPC resources
+### Task Progress Tracking
 
-### Infrastructure
-- `state-storage` - Terraform state storage (S3 + DynamoDB)
-- `random-id-generator` - Random ID generator
+When working on implementation:
+1. **Manual tracking**: Update tasks.md checkboxes manually as you complete tasks
+2. **Progress monitoring**: Use `/kiro:spec-status` to view current completion status
+3. **TodoWrite integration**: Use TodoWrite tool to track active work items
+4. **Status visibility**: Checkbox parsing shows completion percentage
+
+## Getting Started
+
+1. 初始化引導文件：`/kiro:steering`
+2. Create your first spec: `/kiro:spec-init [your-feature-name]`
+3. Follow the workflow through requirements, design, and tasks
+
+## Kiro Steering Details
+
+Kiro-style steering provides persistent project knowledge through markdown files:
+
+### Core Steering Documents
+- **product.md**: Product overview, features, use cases, value proposition
+- **tech.md**: Architecture, tech stack, dev environment, commands, ports
+- **structure.md**: Directory organization, code patterns, naming conventions
+
+### Custom Steering
+Create specialized steering documents for:
+- API standards
+- Testing approaches
+- Code style guidelines
+- Security policies
+- Database conventions
+- Performance standards
+- Deployment workflows
+
+### Inclusion Modes
+- **Always Included**: Loaded in every interaction (default)
+- **Conditional**: Loaded for specific file patterns (e.g., `"*.test.js"`)
+- **Manual**: Loaded on-demand with `#filename` reference
+
+## Kiro Steering Configuration
+
+### Current Steering Files
+The `/kiro:steering` command manages these files automatically. Manual updates to this section reflect changes made through steering commands.
+
+### Active Steering Files
+- `product.md`: Always included - Product context and business objectives
+- `tech.md`: Always included - Technology stack and architectural decisions  
+- `structure.md`: Always included - File organization and code patterns
+
+### Custom Steering Files
+<!-- Added by /kiro:steering-custom command -->
+<!-- Example entries:
+- `api-standards.md`: Conditional - `"src/api/**/*"`, `"**/*api*"` - API design guidelines
+- `testing-approach.md`: Conditional - `"**/*.test.*"`, `"**/spec/**/*"` - Testing conventions
+- `security-policies.md`: Manual - Security review guidelines (reference with @security-policies.md)
+-->
+
+### Usage Notes
+- **Always files**: Automatically loaded in every interaction
+- **Conditional files**: Loaded when working on matching file patterns
+- **Manual files**: Reference explicitly with `@filename.md` syntax when needed
+- **Updating**: Use `/kiro:steering` or `/kiro:steering-custom` commands to modify this configuration
