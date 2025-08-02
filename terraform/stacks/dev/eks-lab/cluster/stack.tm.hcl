@@ -7,6 +7,10 @@ stack {
     "dev-eks-cluster",
     "eks-lab"
   ]
+
+  after = [
+    "/terraform/stacks/dev/networking"
+  ]
 }
 
 generate_hcl "_terramate_generated_backend.tf" {
