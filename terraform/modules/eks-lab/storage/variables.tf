@@ -35,24 +35,24 @@ variable "cluster_name" {
   }
 }
 
-variable "kubernetes_version" {
-  description = "Kubernetes version"
+variable "efs_pv_capacity" {
+  description = "EFS Persistent Volume capacity"
   type        = string
+  default     = "10Gi"
 
   validation {
-    condition     = var.kubernetes_version == "1.33"
-    error_message = "This module only supports Kubernetes version 1.33 (AWS EKS latest stable version as of 2025-08)."
+    condition     = can(regex("^[0-9]+[KMGT]i$", var.efs_pv_capacity))
+    error_message = "PV capacity must be in Kubernetes format (e.g., 10Gi, 5Mi, 1Ti)."
   }
 }
 
-variable "enable_fargate" {
-  description = "Enable Fargate profiles for the EKS cluster"
-  type        = bool
-  default     = true
-}
+variable "efs_pvc_request" {
+  description = "EFS Persistent Volume Claim request size"
+  type        = string
+  default     = "5Gi"
 
-variable "fargate_namespaces" {
-  description = "List of namespaces that should run on Fargate"
-  type        = list(string)
-  default     = ["kube-system", "default"]
+  validation {
+    condition     = can(regex("^[0-9]+[KMGT]i$", var.efs_pvc_request))
+    error_message = "PVC request must be in Kubernetes format (e.g., 5Gi, 10Mi, 1Ti)."
+  }
 }

@@ -52,6 +52,8 @@ generate_hcl "_terramate_generated_main.tf" {
       managed_by        = global.managed_by
       cluster_name      = "dev-eks-cluster"
       kubernetes_version = "1.33"
+      enable_fargate    = true
+      fargate_namespaces = ["kube-system", "default"]
     }
   }
 }
@@ -92,6 +94,22 @@ generate_hcl "_terramate_generated_outputs.tf" {
 
     output "cluster_platform_version" {
       value = module.eks_cluster.cluster_platform_version
+    }
+
+    output "cluster_certificate_authority_data" {
+      value = module.eks_cluster.cluster_certificate_authority_data
+    }
+
+    output "fargate_profile_name" {
+      value = module.eks_cluster.fargate_profile_name
+    }
+
+    output "fargate_profile_arn" {
+      value = module.eks_cluster.fargate_profile_arn
+    }
+
+    output "fargate_pod_execution_role_arn" {
+      value = module.eks_cluster.fargate_pod_execution_role_arn
     }
   }
 }
