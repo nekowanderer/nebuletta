@@ -64,3 +64,44 @@ output "fargate_pod_execution_role_arn" {
   description = "ARN of the Fargate pod execution role"
   value       = var.enable_fargate ? aws_iam_role.fargate_pod_execution_role[0].arn : null
 }
+
+# EKS Addons outputs
+output "vpc_cni_addon_arn" {
+  description = "ARN of the VPC CNI addon"
+  value       = aws_eks_addon.vpc_cni.arn
+}
+
+output "vpc_cni_addon_version" {
+  description = "Version of the VPC CNI addon"
+  value       = aws_eks_addon.vpc_cni.addon_version
+}
+
+output "kube_proxy_addon_arn" {
+  description = "ARN of the kube-proxy addon"
+  value       = aws_eks_addon.kube_proxy.arn
+}
+
+output "kube_proxy_addon_version" {
+  description = "Version of the kube-proxy addon"
+  value       = aws_eks_addon.kube_proxy.addon_version
+}
+
+output "coredns_addon_arn" {
+  description = "ARN of the CoreDNS addon"
+  value       = aws_eks_addon.coredns.arn
+}
+
+output "coredns_addon_version" {
+  description = "Version of the CoreDNS addon"
+  value       = aws_eks_addon.coredns.addon_version
+}
+
+output "metrics_server_addon_arn" {
+  description = "ARN of the metrics server addon"
+  value       = aws_eks_addon.metrics_server.arn
+}
+
+output "metrics_server_addon_version" {
+  description = "Version of the metrics server addon"
+  value       = aws_eks_addon.metrics_server.addon_version
+}

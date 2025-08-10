@@ -56,3 +56,24 @@ variable "fargate_namespaces" {
   type        = list(string)
   default     = ["kube-system", "default"]
 }
+
+# EKS Addons version variables
+variable "vpc_cni_addon_version" {
+  description = "VPC CNI addon version"
+  type        = string
+}
+
+variable "kube_proxy_addon_version" {
+  description = "Kube-proxy addon version"
+  type        = string
+}
+
+variable "coredns_addon_version" {
+  description = "CoreDNS addon version"
+  type        = string
+}
+
+variable "metrics_server_addon_version" {
+  description = "Metrics Server addon version"
+  type        = string
+}

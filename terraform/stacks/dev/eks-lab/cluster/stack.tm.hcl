@@ -55,6 +55,10 @@ generate_hcl "_terramate_generated_main.tf" {
       kubernetes_version = "1.33"
       enable_fargate    = true
       fargate_namespaces = ["kube-system", "default"]
+      vpc_cni_addon_version = "v1.19.0-eksbuild.1"
+      kube_proxy_addon_version = "v1.33.0-eksbuild.2"
+      coredns_addon_version = "v1.11.4-eksbuild.2"
+      metrics_server_addon_version = "v0.8.0-eksbuild.1"
     }
   }
 }
