@@ -34,8 +34,10 @@ resource "aws_subnet" "public" {
   cidr_block              = local.public_subnet_cidrs[count.index]
   availability_zone       = local.available_azs[count.index]
   map_public_ip_on_launch = true
-  tags = merge(
-  local.common_tags, { Name = "${local.prefix}-public-${count.index}" })
+  tags = merge(local.common_tags, {
+    Name                     = "${local.prefix}-public-${count.index}"
+    "kubernetes.io/role/elb" = "1" # This is used by EKS to route traffic to the public subnets (ELB)
+  })
 }
 
 resource "aws_subnet" "private" {
@@ -43,8 +45,10 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.this.id
   cidr_block        = local.private_subnet_cidrs[count.index]
   availability_zone = local.available_azs[count.index]
-  tags = merge(
-  local.common_tags, { Name = "${local.prefix}-private-${count.index}" })
+  tags = merge(local.common_tags, {
+    Name                              = "${local.prefix}-private-${count.index}"
+    "kubernetes.io/role/internal-elb" = "1" # This is used by EKS to route traffic to the private subnets (internal ELB)
+  })
 }
 
 resource "aws_route_table" "public" {

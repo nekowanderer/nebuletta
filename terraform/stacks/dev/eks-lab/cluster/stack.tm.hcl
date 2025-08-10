@@ -40,6 +40,7 @@ generate_hcl "_terramate_generated_terraform_remote_state.tf" {
   }
 }
 
+
 generate_hcl "_terramate_generated_main.tf" {
   content {
     module "eks_cluster" {
