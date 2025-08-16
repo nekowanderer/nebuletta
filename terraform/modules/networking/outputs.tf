@@ -57,6 +57,11 @@ output "vpc_endpoint_logs_id" {
   value       = aws_vpc_endpoint.logs.id
 }
 
+output "vpc_endpoint_sts_id" {
+  description = "The ID of the STS VPC endpoint"
+  value       = aws_vpc_endpoint.sts.id
+}
+
 output "availability_zones" {
   description = "List of availability zones used"
   value       = local.available_azs

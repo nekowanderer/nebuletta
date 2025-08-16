@@ -12,6 +12,7 @@ This project implements Kiro-style Spec-Driven Development for Claude Code using
 
 ### Active Specifications
 - Current spec: Check `.kiro/specs/` for active specifications
+- **aws-eks-infrastructure**: AWS EKS 基礎設施建立 - 包含 EKS cluster、OIDC、EFS、Load balancer controller、Fargate profile、應用程式部署、Ingress、Metrics server、HPA
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines

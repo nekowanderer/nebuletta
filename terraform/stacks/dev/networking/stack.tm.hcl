@@ -87,6 +87,10 @@ generate_hcl "_terramate_generated_outputs.tf" {
       value = module.networking.vpc_endpoint_logs_id
     }
 
+    output "vpc_endpoint_sts_id" {
+      value = module.networking.vpc_endpoint_sts_id
+    }
+
     output "availability_zones" {
       value = module.networking.availability_zones
     }

@@ -215,6 +215,13 @@ module "networking" {
 
   $ terramate run --tags dev-state-storage -- terraform apply
 
+  $ terramate run --tags dev-state-storage -- terraform destroy
+
+  # Skip approval prompt 
+  $ terramate run --tags dev-state-storage -- terraform apply -auto-approve
+
+  $ terramate run --tags dev-state-storage -- terraform destroy -auto-approve
+
   # Then you should be able to see the related components in the AWS console
   ```
 
